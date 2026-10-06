@@ -209,9 +209,45 @@ button { font-family: inherit; color: inherit; }
 .streak { text-align: center; font-size: 1.15rem; font-weight: 600; color: var(--orange); min-height: 1.6em; margin-top: 14px; }
 .hint-keys { text-align: center; color: var(--ink-soft); font-size: 0.95rem; margin-top: 14px; }
 
+/* Subject tabs */
+.subject-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px; }
+.subject-tab {
+  --c: var(--sea);
+  cursor: pointer; border: 3px solid transparent; border-radius: 999px; padding: 10px 12px;
+  background: var(--paper); font-size: 1.15rem; font-weight: 600; box-shadow: var(--shadow);
+  display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap;
+  transition: transform 0.12s ease;
+}
+.subject-tab:hover { transform: translateY(-2px); }
+.subject-tab[aria-pressed="true"] { background: var(--c); color: #fff; box-shadow: 0 5px 0 rgba(0, 0, 0, 0.15); }
+.subject-emoji { font-size: 1.4rem; }
+
+/* Pictures, letters and words in questions */
+.pic-card { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.big-pic { font-size: clamp(4rem, 14vw, 5.5rem); line-height: 1.1; animation: drop 0.35s ease; }
+.word-hint { font-size: 1.6rem; font-weight: 600; letter-spacing: 3px; }
+.word-hint .box { font-size: 1.4rem; padding: 0 0.2em; border-width: 3px; }
+.big-letter { font-size: clamp(4rem, 15vw, 6rem); line-height: 1; color: var(--grape); }
+.word-big { letter-spacing: 3px; }
+.seq { letter-spacing: 0.25em; }
+
+.say-row { display: flex; justify-content: center; }
+.say-btn {
+  cursor: pointer; border: 0; border-radius: 999px; padding: 8px 18px; margin: 4px 0 6px;
+  background: var(--sky); color: var(--sea); font-size: 1.05rem; font-weight: 600;
+  box-shadow: 0 3px 0 rgba(27, 152, 224, 0.25);
+}
+.say-btn:hover { background: #cde9ff; }
+.say-btn[hidden] { display: none; }
+
+.option.word .label { font-size: clamp(1.3rem, 5vw, 1.9rem); overflow-wrap: anywhere; }
+.option.emoji .label { font-size: clamp(2.6rem, 10vw, 3.4rem); line-height: 1.1; }
+.option.emoji .caption { font-size: 1.1rem; font-weight: 600; }
+
 /* Game over */
 .over { text-align: center; padding-top: 28px; }
 .over h2 { font-size: 2.2rem; margin: 8px 0; }
+.over-sub { margin: 0 0 4px; font-size: 1.1rem; color: var(--ink-soft); font-weight: 500; }
 .stars { font-size: 2.8rem; letter-spacing: 6px; margin: 6px 0 14px; }
 .stars .off { filter: grayscale(1); opacity: 0.3; }
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 0 0 12px; }
@@ -247,6 +283,7 @@ button { font-family: inherit; color: inherit; }
 /* Phone layout */
 @media (max-width: 560px) {
   .age-grid { grid-template-columns: repeat(2, 1fr); }
+  .subject-tabs { grid-template-columns: repeat(2, 1fr); }
   .options { --cols: 2 !important; gap: 10px; }
   .option { min-height: 84px; }
   .stats { grid-template-columns: repeat(2, 1fr); }

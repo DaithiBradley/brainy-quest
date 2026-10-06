@@ -1,8 +1,8 @@
 {
-  "name": "number-quest",
+  "name": "brainy-quest",
   "version": "1.0.0",
   "private": true,
-  "description": "A colourful browser number game for children aged 4 to 9.",
+  "description": "A colourful browser learning game for children aged 4 to 9: numbers, letters, words and sounds.",
   "type": "module",
   "scripts": {
     "start": "node serve.mjs"

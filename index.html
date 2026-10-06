@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Number Quest</title>
-  <meta name="description" content="A colourful number game for children aged 4 to 9: bigger, smaller, adding, taking away and more.">
+  <title>Brainy Quest</title>
+  <meta name="description" content="A colourful learning game for children aged 4 to 9: numbers, letters, words and sounds.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -19,7 +19,7 @@
   <main class="app">
     <header class="topbar">
       <button class="brand" id="homeBtn" type="button" aria-label="Back to the start screen">
-        <span class="logo" aria-hidden="true">🔢</span> Number Quest
+        <span class="logo" aria-hidden="true">🌟</span> Brainy Quest
       </button>
       <button class="icon-btn" id="muteBtn" type="button" aria-label="Turn sound off">🔊</button>
     </header>
@@ -28,9 +28,10 @@
     <section id="screen-start" class="screen active" aria-labelledby="startTitle">
       <div class="hero">
         <div class="mascot big bob" aria-hidden="true">🦉</div>
-        <h1 id="startTitle">Ready for a number adventure?</h1>
-        <p>Pick your age to start. It gets a little trickier as you go!</p>
+        <h1 id="startTitle">Ready for a learning adventure?</h1>
+        <p>Pick what to play, then your age. It gets a little trickier as you go!</p>
       </div>
+      <div class="subject-tabs" id="subjectTabs" role="group" aria-label="What do you want to play?"></div>
       <div class="age-grid" id="ageGrid"></div>
       <ul class="how">
         <li><span aria-hidden="true">❤️</span> 3 lives. A wrong answer costs one.</li>
@@ -43,7 +44,7 @@
     <section id="screen-game" class="screen" aria-label="Game">
       <div class="hud">
         <div class="lives" id="lives" role="img" aria-label="3 lives"></div>
-        <div class="pill level-pill">Level <b id="level">1</b></div>
+        <div class="pill level-pill"><span id="subjectIcon" aria-hidden="true">🔢</span> Level <b id="level">1</b></div>
         <div class="pill score-pill"><span aria-hidden="true">⭐</span> <b id="score">0</b></div>
       </div>
       <div class="progress" aria-hidden="true"><div class="progress-fill" id="progress"></div></div>
@@ -54,6 +55,7 @@
           <p class="bubble" id="bubble" aria-live="polite">You can do it!</p>
         </div>
         <h2 class="instruction" id="instruction"></h2>
+        <div class="say-row"><button class="say-btn" id="sayBtn" type="button" hidden><span aria-hidden="true">🔈</span> Hear it</button></div>
         <div class="visual" id="visual" aria-hidden="true"></div>
         <div class="question" id="question"></div>
         <div class="options" id="options"></div>
@@ -67,6 +69,7 @@
       <div class="card over">
         <div class="mascot big bob" id="overMascot" aria-hidden="true">🦉</div>
         <h2 id="overTitle">Great playing!</h2>
+        <p class="over-sub" id="overSub"></p>
         <div class="stars" id="overStars" role="img"></div>
         <dl class="stats">
           <div><dt>Score</dt><dd id="overScore">0</dd></div>
@@ -91,6 +94,11 @@
     </div>
   </div>
 
+  <script src="js/core.js"></script>
+  <script src="js/numbers.js"></script>
+  <script src="js/letters.js"></script>
+  <script src="js/words.js"></script>
+  <script src="js/phonics.js"></script>
   <script src="game.js"></script>
 </body>
 </html>
