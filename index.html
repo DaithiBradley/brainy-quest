@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Brainy Quest</title>
-  <meta name="description" content="A colourful learning game for children aged 4 to 9: numbers, letters, words and sounds.">
+  <meta name="description" content="A colourful learning game for children aged 4 to 9: numbers, letters, words, sounds, shapes, time and memory.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -33,9 +33,12 @@
       </div>
       <div class="subject-tabs" id="subjectTabs" role="group" aria-label="What do you want to play?"></div>
       <div class="age-grid" id="ageGrid"></div>
+      <div class="sticker-cta">
+        <button class="btn sticker-btn" id="stickerBtn" type="button"><span aria-hidden="true">📒</span> My sticker book <span class="count" id="stickerCount">0/60</span></button>
+      </div>
       <ul class="how">
         <li><span aria-hidden="true">❤️</span> 3 lives. A wrong answer costs one.</li>
-        <li><span aria-hidden="true">⭐</span> 5 right answers = next level, plus a life back.</li>
+        <li><span aria-hidden="true">⭐</span> 5 right answers = next level, a life back and a new sticker.</li>
         <li><span aria-hidden="true">🔥</span> 3 in a row earns bonus points.</li>
       </ul>
     </section>
@@ -58,6 +61,10 @@
         <div class="say-row"><button class="say-btn" id="sayBtn" type="button" hidden><span aria-hidden="true">🔈</span> Hear it</button></div>
         <div class="visual" id="visual" aria-hidden="true"></div>
         <div class="question" id="question"></div>
+        <div class="study" id="study" hidden>
+          <div class="study-bar" aria-hidden="true"><div class="study-fill" id="studyFill"></div></div>
+          <button class="btn primary" id="readyBtn" type="button">I'm ready!</button>
+        </div>
         <div class="options" id="options"></div>
         <div class="streak" id="streak" aria-live="polite"></div>
       </div>
@@ -78,17 +85,31 @@
           <div><dt>Best</dt><dd id="overBest">0</dd></div>
         </dl>
         <p class="new-best" id="newBest" hidden>🏆 New best score!</p>
+        <div class="over-stickers" id="overStickers" hidden>
+          <p>New stickers: <span class="list" id="overStickerList"></span></p>
+          <button class="btn small" id="overStickerBtn" type="button"><span aria-hidden="true">📒</span> See my sticker book</button>
+        </div>
         <div class="actions">
           <button class="btn primary" id="againBtn" type="button">Play again</button>
           <button class="btn" id="ageBtn" type="button">Choose age</button>
         </div>
       </div>
     </section>
+
+    <!-- Sticker book -->
+    <section id="screen-stickers" class="screen" aria-labelledby="stickerTitle">
+      <div class="card stickers-card">
+        <h2 id="stickerTitle"><span aria-hidden="true">📒</span> My sticker book</h2>
+        <p class="sticker-summary" id="stickerSummary"></p>
+        <div id="stickerPages"></div>
+        <div class="actions"><button class="btn primary" id="stickerBackBtn" type="button">Back to the games</button></div>
+      </div>
+    </section>
   </main>
 
   <div class="banner" id="banner" hidden>
     <div class="banner-inner">
-      <div class="banner-emoji" aria-hidden="true">🌟</div>
+      <div class="banner-emoji" id="bannerEmoji" aria-hidden="true">🌟</div>
       <div class="banner-title" id="bannerTitle">Level 2!</div>
       <div class="banner-sub" id="bannerSub">Getting trickier...</div>
     </div>
@@ -99,6 +120,9 @@
   <script src="js/letters.js"></script>
   <script src="js/words.js"></script>
   <script src="js/phonics.js"></script>
+  <script src="js/shapes.js"></script>
+  <script src="js/time.js"></script>
+  <script src="js/memory.js"></script>
   <script src="game.js"></script>
 </body>
 </html>

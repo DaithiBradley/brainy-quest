@@ -8,6 +8,9 @@
     { id: 'letters', name: 'Letters', emoji: '🔤', color: 'var(--pink)' },
     { id: 'words', name: 'Words', emoji: '📖', color: 'var(--mint)' },
     { id: 'phonics', name: 'Sounds', emoji: '👂', color: 'var(--grape)' },
+    { id: 'shapes', name: 'Shapes', emoji: '🔷', color: 'var(--orange)' },
+    { id: 'time', name: 'Time', emoji: '🕐', color: 'var(--coral)' },
+    { id: 'memory', name: 'Memory', emoji: '🧠', color: 'var(--sea)' },
   ];
   const AGES = [
     { age: 4, name: 'Little Chick', emoji: '🐣', color: 'var(--pink)' },
@@ -22,6 +25,16 @@
   const PER_LEVEL = 5;
   const PRAISE = ['Great job!', 'Super!', 'You got it!', 'Brilliant!', 'Amazing!', 'Fantastic!', 'Well done!', 'Wow!'];
   const STORE_KEY = 'numberQuest.v1';
+  // One new sticker for every level reached, in any subject.
+  const STICKERS = [
+    { name: 'Animals', items: ['🦁', '🐯', '🐼', '🐨', '🦒', '🦓', '🐘', '🦛', '🦘', '🐒', '🦥', '🦔', '🦉', '🦜', '🦩', '🐧'] },
+    { name: 'Under the sea', items: ['🐙', '🦑', '🐠', '🐡', '🦈', '🐳', '🐬', '🦭', '🐢', '🦀', '🐚', '🦞'] },
+    { name: 'Space', items: ['🚀', '🛸', '🪐', '🌍', '🌙', '☄️', '👽', '🌟'] },
+    { name: 'Treats', items: ['🍦', '🍩', '🧁', '🍭', '🍫', '🍪', '🎂', '🍉'] },
+    { name: 'Magic', items: ['🦄', '🐉', '🧚', '🧙', '🏰', '👑', '💎', '🌈'] },
+    { name: 'Fun', items: ['🎈', '🎨', '🎸', '🥁', '⚽', '🛹', '🎡', '🪁'] },
+  ];
+  const ALL_STICKERS = STICKERS.flatMap((g) => g.items);
 
   const $ = (s) => document.querySelector(s);
 
@@ -32,7 +45,7 @@
   function saveStore(data) {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); } catch { /* storage unavailable */ }
   }
-  const store = Object.assign({ best: {}, muted: false, subject: 'numbers' }, loadStore());
+  const store = Object.assign({ best: {}, muted: false, subject: 'numbers', stickers: [], bonusStars: 0 }, loadStore());
   // Best scores used to be keyed by age only (numbers was the only subject).
   for (const k of Object.keys(store.best)) {
     if (/^\d$/.test(k)) {
@@ -97,6 +110,7 @@
   const state = {
     subject: store.subject, age: 4, level: 1, score: 0, lives: MAX_LIVES, streak: 0,
     inLevel: 0, correct: 0, q: null, locked: false, timer: null, shownAt: 0,
+    studying: false, newStickers: [],
   };
 
   // ---------- Screens ----------
@@ -130,7 +144,7 @@
   // ---------- Game flow ----------
   function startGame(age) {
     clearTimeout(state.timer);
-    Object.assign(state, { age, level: 1, score: 0, lives: MAX_LIVES, streak: 0, inLevel: 0, correct: 0, q: null, locked: false });
+    Object.assign(state, { age, level: 1, score: 0, lives: MAX_LIVES, streak: 0, inLevel: 0, correct: 0, q: null, locked: false, studying: false, newStickers: [] });
     $('#mascot').textContent = AGES.find((a) => a.age === age).emoji;
     $('#subjectIcon').textContent = SUBJECTS.find((s) => s.id === state.subject).emoji;
     renderHud();
@@ -157,10 +171,40 @@
   function nextQuestion() {
     const q = Quest.subjects[state.subject].make(state.age, state.level, state.q && state.q.type);
     state.q = q;
+    setBubble(state.streak >= 3 ? "You're on fire!" : pick(['You can do it!', 'Have a think...', "Let's go!", 'Take your time.']));
+    if (canSpeak) speechSynthesis.cancel();
+    renderHud();
+    if (q.study) showStudy(q);
+    else showQuestion(q);
+  }
+
+  // Memory questions: show the things to remember, then hide them.
+  function showStudy(q) {
+    state.studying = true;
+    state.locked = true;
+    $('#instruction').innerHTML = q.study.instruction;
+    $('#visual').innerHTML = q.study.visual;
+    $('#question').innerHTML = '';
+    $('#options').innerHTML = '';
+    $('#sayBtn').hidden = true;
+    $('#study').hidden = false;
+    const fill = $('#studyFill');
+    fill.style.transition = 'none';
+    fill.style.width = '100%';
+    void fill.offsetWidth;
+    fill.style.transition = `width ${q.study.ms}ms linear`;
+    fill.style.width = '0%';
+    if (autoSpeak()) speak(q.study.instruction);
+    state.timer = setTimeout(() => showQuestion(q), q.study.ms);
+  }
+
+  function showQuestion(q) {
+    if (state.q !== q) return;
+    clearTimeout(state.timer);
+    state.studying = false;
     state.locked = false;
     state.shownAt = performance.now();
-
-    setBubble(state.streak >= 3 ? "You're on fire!" : pick(['You can do it!', 'Have a think...', "Let's go!", 'Take your time.']));
+    $('#study').hidden = true;
     $('#instruction').innerHTML = q.instruction;
     $('#visual').innerHTML = q.visual;
     $('#question').innerHTML = q.question;
@@ -174,17 +218,15 @@
       <button class="option ${q.optionStyle || ''}" type="button" data-index="${i}" style="--c:${colors[i % colors.length]}"
         aria-label="${esc(o.caption ? `${o.label}, ${o.caption}` : o.label)}">
         <span class="key" aria-hidden="true">${i + 1}</span>
-        <span class="label">${esc(o.label)}</span>
+        <span class="label">${o.html || esc(o.label)}</span>
         ${o.caption ? `<span class="caption">${esc(o.caption)}</span>` : ''}
         ${o.dots ? `<span class="dots" aria-hidden="true">${'<i></i>'.repeat(o.dots)}</span>` : ''}
       </button>`).join('');
-    renderHud();
-    if (canSpeak) speechSynthesis.cancel();
     if (q.say && autoSpeak()) setTimeout(() => { if (state.q === q) speak(q.say); }, 250);
   }
 
   function choose(index) {
-    if (state.locked || !state.q) return;
+    if (state.locked || state.studying || !state.q) return;
     // Ignore taps/keys in the first moment of a new question, so a key held or
     // mashed on the last question doesn't answer this one by accident.
     if (performance.now() - state.shownAt < 350) return;
@@ -232,18 +274,34 @@
     m.classList.remove('cheer'); void m.offsetWidth; m.classList.add('cheer');
   }
 
+  // A sticker the child doesn't have yet; once the book is full, a bonus star.
+  function awardSticker() {
+    const missing = ALL_STICKERS.filter((x) => !store.stickers.includes(x));
+    if (!missing.length) { store.bonusStars += 1; saveStore(store); return null; }
+    const sticker = pick(missing);
+    store.stickers.push(sticker);
+    saveStore(store);
+    state.newStickers.push(sticker);
+    return sticker;
+  }
+
   function levelUp() {
     state.level += 1;
     state.inLevel = 0;
     const gotLife = state.lives < MAX_LIVES;
     if (gotLife) state.lives += 1;
+    const sticker = awardSticker();
     renderHud();
+    $('#bannerEmoji').textContent = sticker || '🌟';
     $('#bannerTitle').textContent = `Level ${state.level}!`;
-    $('#bannerSub').textContent = gotLife ? 'You earned a life back ❤️' : 'Getting a little trickier...';
+    $('#bannerSub').textContent = [
+      sticker ? 'A new sticker for your book!' : 'Your sticker book is full! Bonus star!',
+      gotLife ? 'And a life back ❤️' : '',
+    ].filter(Boolean).join(' ');
     $('#banner').hidden = false;
     sfx.level();
     confetti(window.innerWidth / 2, window.innerHeight / 3, 120);
-    state.timer = setTimeout(() => { $('#banner').hidden = true; nextQuestion(); }, 1800);
+    state.timer = setTimeout(() => { $('#banner').hidden = true; nextQuestion(); }, 2400);
   }
 
   function gameOver() {
@@ -263,10 +321,36 @@
     $('#overCorrect').textContent = state.correct;
     $('#overBest').textContent = Math.max(prevBest, state.score);
     $('#newBest').hidden = !isBest;
+    $('#overStickers').hidden = !state.newStickers.length;
+    $('#overStickerList').textContent = state.newStickers.join(' ');
     show('over');
     sfx.over();
     if (isBest && state.score > 0) setTimeout(() => confetti(window.innerWidth / 2, window.innerHeight / 3, 160), 250);
     $('#againBtn').focus();
+  }
+
+  function renderStickerCount() {
+    $('#stickerCount').textContent = `${store.stickers.length}/${ALL_STICKERS.length}`;
+  }
+
+  function showStickers() {
+    clearTimeout(state.timer);
+    if (canSpeak) speechSynthesis.cancel();
+    $('#banner').hidden = true;
+    state.q = null;
+    const have = new Set(store.stickers);
+    $('#stickerSummary').textContent = `You have ${have.size} of ${ALL_STICKERS.length} stickers.`
+      + (store.bonusStars ? ` Plus ${store.bonusStars} bonus star${store.bonusStars > 1 ? 's' : ''}!` : ' Reach a new level in any game to earn one.');
+    $('#stickerPages').innerHTML = STICKERS.map((g) => `
+      <section class="sticker-page">
+        <h3>${g.name} <span>${g.items.filter((x) => have.has(x)).length}/${g.items.length}</span></h3>
+        <ul class="sticker-grid">
+          ${g.items.map((x) => (have.has(x)
+            ? `<li class="sticker">${x}</li>`
+            : '<li class="sticker locked" aria-label="Not collected yet">?</li>')).join('')}
+        </ul>
+      </section>`).join('');
+    show('stickers');
   }
 
   function goHome() {
@@ -276,6 +360,7 @@
     state.q = null;
     renderSubjects();
     renderAgeGrid();
+    renderStickerCount();
     show('start');
   }
 
@@ -361,6 +446,10 @@
   // The Hear it button always speaks, even when sound effects are muted.
   $('#sayBtn').addEventListener('click', () => state.q && speak(state.q.say));
   $('#againBtn').addEventListener('click', () => startGame(state.age));
+  $('#readyBtn').addEventListener('click', () => state.studying && showQuestion(state.q));
+  $('#stickerBtn').addEventListener('click', showStickers);
+  $('#overStickerBtn').addEventListener('click', showStickers);
+  $('#stickerBackBtn').addEventListener('click', goHome);
   $('#ageBtn').addEventListener('click', goHome);
   $('#homeBtn').addEventListener('click', goHome);
   $('#muteBtn').addEventListener('click', () => {
@@ -379,6 +468,7 @@
   renderSubjects();
   renderAgeGrid();
   renderMute();
+  renderStickerCount();
 
   // Exposed for quick checks in the browser console.
   Quest.debug = { state };

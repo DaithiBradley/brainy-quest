@@ -1,8 +1,11 @@
 // Shared helpers and the subject registry. Loaded before the subject files.
 // Each subject registers Quest.subjects.<id> = { make(age, level, previousType) }
 // and make() returns a question:
-//   { type, instruction, visual, question, options: [{ value, label, caption?, dots?, aria? }],
-//     answer, explain, say?, optionStyle? }
+//   { type, instruction, visual, question, options: [{ value, label, html?, caption?, dots? }],
+//     answer, explain, say?, optionStyle?, study? }
+// `html` is trusted markup made by a generator (e.g. an SVG shape); `label` is
+// the text used for screen readers. `study` = { instruction, visual, ms } shows
+// something to remember first, then the question (used by Memory).
 window.Quest = (() => {
   'use strict';
 
@@ -32,6 +35,19 @@ window.Quest = (() => {
     return shuffle([answer, ...wrong]);
   }
 
+  // A number answer plus n-1 different numbers close to it (never below min).
+  function nearNumbers(answer, n, spread = 2, min = 0) {
+    const set = new Set([answer]);
+    let guard = 0;
+    while (set.size < n && guard++ < 300) {
+      const d = answer + rand(-spread, spread);
+      if (d >= min) set.add(d);
+    }
+    let k = 1;
+    while (set.size < n) set.add(answer + k++);
+    return shuffle([...set]);
+  }
+
   // How many answer buttons to show: fewer for the youngest, more as they level up.
   const choicesFor = (age, level) => (age === 4 ? (level < 3 ? 2 : 3) : age <= 6 ? (level < 3 ? 3 : 4) : 4);
 
@@ -48,5 +64,5 @@ window.Quest = (() => {
 
   const box = '<span class="box">?</span>';
 
-  return { rand, pick, span, shuffle, esc, cap, article, withDistractors, choicesFor, pickType, picture, box, subjects: {} };
+  return { rand, pick, span, shuffle, esc, cap, article, withDistractors, nearNumbers, choicesFor, pickType, picture, box, subjects: {} };
 })();
